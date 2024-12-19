@@ -24,11 +24,11 @@ for development
 - [x] recruit citizen: move everything to the button
     - move it above my citizens with recruit
     - ditch modal and just go to confirmation screen
+- [x] add reown wallet - https://reown.com/
 - [ ] balances
     - add a "your total sol balance" (maybe where question mark is?)
     - need a deposit sol button
     - withdrawl sol
-- [x] add reown wallet - https://reown.com/
 - [ ] deposit sol
 - [ ] add twitter auth to confirm your account
 - [ ] add stake modal to citizen (design). Just stake or not stake to a certain nation
