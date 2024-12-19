@@ -38,9 +38,9 @@ for development
 
 
     WHEN BACK
-    - citizen: replace icon with number
-    - modal should be for staking to a ccertain nation
-    - balance modal: need to experiment if i can get appkit there locally to open a transaction?
+    - [x] citizen: replace icon with number
+    - [x] modal should be for staking to a ccertain nation
+    - [ ] balance modal: need to experiment if i can get appkit there locally to open a transaction?
 
 
 - PoW need to add hashing
@@ -52,4 +52,17 @@ for development
         const bountyHashLimited = reduceTo252Bits(numberToUint8Array(bountyHash));
         ```
 
+# Twitter Sign in Todo
+
+User clicks "Sign in with Twitter" → Frontend redirects to /auth/twitter.
+
+Backend requests temp token from https://api.twitter.com/oauth/request_token.
+
+User is redirected to Twitter to log in.
+
+User grants access → Twitter redirects back to /auth/callback.
+
+Backend requests access token from https://api.twitter.com/oauth/access_token.
+
+User info is saved in the database, and the user is logged in.
     
