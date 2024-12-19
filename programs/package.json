@@ -3,7 +3,8 @@
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "test": "bun run cleanup && sh tests/deploy.sh && bun test",
+    "start": "bun run cleanup && sh tests/deploy.sh",
+    "test": "bun run start && bun test",
     "cleanup": "sh tests/cleanup.sh"
   },
   "dependencies": {

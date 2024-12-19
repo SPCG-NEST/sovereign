@@ -1,0 +1,2 @@
+### Test
+Run tests with `bun run test`. This will deploy a new test validator with the built program and runs the test files on it (`bun test`). Once deployed, if you don't wish to deploy again (e.g. you only changed the test files and didn't need to rebuild), just run `bun test`.

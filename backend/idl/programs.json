@@ -1,0 +1,2491 @@
+{
+  "address": "4oVhv3o16X3XR99UgbFrWNKptoNBkg2hsbNY2nYPpv4a",
+  "metadata": {
+    "name": "programs",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "claim_bounty",
+      "discriminator": [
+        225,
+        157,
+        163,
+        238,
+        239,
+        169,
+        75,
+        226
+      ],
+      "accounts": [
+        {
+          "name": "player_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "broker_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game.broker_key",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "game"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "ClaimBountyArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "cleanup_bounty",
+      "discriminator": [
+        183,
+        247,
+        240,
+        116,
+        75,
+        113,
+        38,
+        64
+      ],
+      "accounts": [
+        {
+          "name": "broker_key",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game"
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "coup_nation",
+      "discriminator": [
+        167,
+        85,
+        9,
+        72,
+        126,
+        31,
+        246,
+        100
+      ],
+      "accounts": [
+        {
+          "name": "game_account"
+        },
+        {
+          "name": "nation",
+          "writable": true
+        },
+        {
+          "name": "nation_authority"
+        },
+        {
+          "name": "broker_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game_account.broker_key",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "world_agent_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game_account.world_agent",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_bounty",
+      "discriminator": [
+        122,
+        90,
+        14,
+        143,
+        8,
+        125,
+        200,
+        2
+      ],
+      "accounts": [
+        {
+          "name": "broker_key",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game"
+        },
+        {
+          "name": "bounty",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  117,
+                  110,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.id",
+                "account": "Game"
+              },
+              {
+                "kind": "arg",
+                "path": "args.bounty_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CreateBountyArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit_or_withdraw_sol_to_wallet",
+      "discriminator": [
+        98,
+        58,
+        181,
+        117,
+        143,
+        160,
+        69,
+        152
+      ],
+      "accounts": [
+        {
+          "name": "wallet_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "wallet_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_account"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "DepositOrWithdrawSolArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit_or_withdraw_token_from_wallet_to_pool",
+      "discriminator": [
+        91,
+        148,
+        31,
+        217,
+        17,
+        193,
+        43,
+        16
+      ],
+      "accounts": [
+        {
+          "name": "world_agent",
+          "signer": true
+        },
+        {
+          "name": "world_agent_wallet"
+        },
+        {
+          "name": "game_account"
+        },
+        {
+          "name": "game_pool",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "DepositOrWithdrawTokenArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit_to_broker",
+      "discriminator": [
+        37,
+        118,
+        8,
+        211,
+        39,
+        197,
+        235,
+        7
+      ],
+      "accounts": [
+        {
+          "name": "nation_authority",
+          "signer": true
+        },
+        {
+          "name": "nation",
+          "writable": true
+        },
+        {
+          "name": "game"
+        },
+        {
+          "name": "broker_escrow",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "DepositToBrokerArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "init_game",
+      "discriminator": [
+        251,
+        46,
+        12,
+        208,
+        184,
+        148,
+        157,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "init_game_args.id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "world_agent_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "init_game_args.id"
+              },
+              {
+                "kind": "arg",
+                "path": "init_game_args.world_agent"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "init_game_args.id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "broker_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  114,
+                  111,
+                  107,
+                  101,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "init_game_args.id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collection",
+          "docs": [
+            "CHECK"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mpl_core_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "init_game_args",
+          "type": {
+            "defined": {
+              "name": "InitGameArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "init_nation",
+      "discriminator": [
+        181,
+        80,
+        22,
+        57,
+        240,
+        37,
+        182,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "game_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "nation_authority",
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "nation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.id",
+                "account": "Game"
+              },
+              {
+                "kind": "arg",
+                "path": "init_nation_args.id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "InitNationArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "loot_nation",
+      "discriminator": [
+        96,
+        228,
+        67,
+        232,
+        30,
+        26,
+        117,
+        5
+      ],
+      "accounts": [
+        {
+          "name": "game_account"
+        },
+        {
+          "name": "nation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "nation.game_id",
+                "account": "Nation"
+              },
+              {
+                "kind": "account",
+                "path": "nation.authority",
+                "account": "Nation"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "player_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_wallet",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint_citizen",
+      "discriminator": [
+        17,
+        164,
+        11,
+        250,
+        142,
+        8,
+        137,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "player_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "world_agent_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game_account.world_agent",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collection",
+          "writable": true
+        },
+        {
+          "name": "citizen_asset",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mpl_core_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint_tokens_to_player_wallet",
+      "discriminator": [
+        181,
+        254,
+        23,
+        245,
+        4,
+        237,
+        5,
+        213
+      ],
+      "accounts": [
+        {
+          "name": "nation_authority",
+          "signer": true
+        },
+        {
+          "name": "nation",
+          "writable": true
+        },
+        {
+          "name": "player_wallet"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "MintTokensToPlayerWalletArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "nation_boost",
+      "discriminator": [
+        243,
+        190,
+        143,
+        205,
+        147,
+        3,
+        167,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "world_authority",
+          "signer": true
+        },
+        {
+          "name": "world_agent_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game_account.world_agent",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_account"
+        },
+        {
+          "name": "nation",
+          "writable": true
+        },
+        {
+          "name": "nation_authority"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "NationBoostArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_player",
+      "discriminator": [
+        242,
+        146,
+        194,
+        234,
+        234,
+        145,
+        228,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "player_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game"
+        },
+        {
+          "name": "player",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "player_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "player_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "RegisterPlayerArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "stake_or_unstake_citizen",
+      "discriminator": [
+        92,
+        63,
+        186,
+        227,
+        249,
+        94,
+        237,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "player_authority",
+          "signer": true
+        },
+        {
+          "name": "citizen_asset",
+          "writable": true
+        },
+        {
+          "name": "game_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mpl_core_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "StakeOrUnstakeCitizenArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "swap_token_to_token",
+      "discriminator": [
+        56,
+        160,
+        13,
+        242,
+        193,
+        120,
+        57,
+        194
+      ],
+      "accounts": [
+        {
+          "name": "wallet_authority",
+          "signer": true
+        },
+        {
+          "name": "wallet",
+          "writable": true
+        },
+        {
+          "name": "game_pool",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "SwapTokenToTokenArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "transfer_tokens_from_wallet_to_wallet",
+      "discriminator": [
+        219,
+        252,
+        5,
+        11,
+        243,
+        61,
+        137,
+        253
+      ],
+      "accounts": [
+        {
+          "name": "wallet_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "wallet",
+          "writable": true
+        },
+        {
+          "name": "receiver",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "TransferTokensArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "update_nation_reward_rate",
+      "discriminator": [
+        236,
+        59,
+        23,
+        69,
+        197,
+        81,
+        189,
+        10
+      ],
+      "accounts": [
+        {
+          "name": "nation_authority",
+          "signer": true
+        },
+        {
+          "name": "nation",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "UpdateNationRewardRateArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "world_disaster",
+      "discriminator": [
+        59,
+        221,
+        230,
+        44,
+        5,
+        230,
+        89,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "world_authority",
+          "signer": true
+        },
+        {
+          "name": "world_agent_wallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "game_account.world_agent",
+                "account": "Game"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_account",
+          "writable": true
+        },
+        {
+          "name": "nation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game_account.id",
+                "account": "Game"
+              },
+              {
+                "kind": "account",
+                "path": "nation.authority",
+                "account": "Nation"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "WorldDisasterArgs"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BaseAssetV1",
+      "discriminator": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "BaseCollectionV1",
+      "discriminator": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bounty",
+      "discriminator": [
+        237,
+        16,
+        105,
+        198,
+        19,
+        69,
+        242,
+        234
+      ]
+    },
+    {
+      "name": "BrokerEscrow",
+      "discriminator": [
+        63,
+        68,
+        116,
+        182,
+        187,
+        189,
+        197,
+        245
+      ]
+    },
+    {
+      "name": "Game",
+      "discriminator": [
+        27,
+        90,
+        166,
+        125,
+        74,
+        100,
+        121,
+        18
+      ]
+    },
+    {
+      "name": "Nation",
+      "discriminator": [
+        3,
+        57,
+        73,
+        252,
+        71,
+        101,
+        109,
+        205
+      ]
+    },
+    {
+      "name": "Player",
+      "discriminator": [
+        205,
+        222,
+        112,
+        7,
+        165,
+        155,
+        206,
+        218
+      ]
+    },
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    },
+    {
+      "name": "Wallet",
+      "discriminator": [
+        24,
+        89,
+        59,
+        139,
+        81,
+        154,
+        232,
+        95
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ClaimBountyEvent",
+      "discriminator": [
+        212,
+        75,
+        77,
+        76,
+        213,
+        234,
+        176,
+        222
+      ]
+    },
+    {
+      "name": "DepositToBrokerEvent",
+      "discriminator": [
+        98,
+        232,
+        18,
+        208,
+        154,
+        127,
+        39,
+        105
+      ]
+    },
+    {
+      "name": "GameOverEvent",
+      "discriminator": [
+        38,
+        254,
+        214,
+        145,
+        206,
+        19,
+        233,
+        62
+      ]
+    },
+    {
+      "name": "MintCitizenEvent",
+      "discriminator": [
+        19,
+        235,
+        124,
+        59,
+        184,
+        139,
+        99,
+        123
+      ]
+    },
+    {
+      "name": "MintTokensToPlayerWalletEvent",
+      "discriminator": [
+        167,
+        94,
+        181,
+        211,
+        236,
+        234,
+        103,
+        118
+      ]
+    },
+    {
+      "name": "NationBoostEvent",
+      "discriminator": [
+        172,
+        156,
+        107,
+        25,
+        190,
+        113,
+        167,
+        75
+      ]
+    },
+    {
+      "name": "NationDissolutionEvent",
+      "discriminator": [
+        183,
+        188,
+        155,
+        94,
+        1,
+        68,
+        201,
+        195
+      ]
+    },
+    {
+      "name": "StakeOrUnstakeCitizenEvent",
+      "discriminator": [
+        199,
+        218,
+        192,
+        150,
+        16,
+        21,
+        69,
+        253
+      ]
+    },
+    {
+      "name": "WorldDisasterEvent",
+      "discriminator": [
+        50,
+        221,
+        82,
+        162,
+        167,
+        221,
+        148,
+        156
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidGameId",
+      "msg": "Invalid Game ID"
+    },
+    {
+      "code": 6001,
+      "name": "MathOverflow",
+      "msg": "Math Overflow"
+    },
+    {
+      "code": 6002,
+      "name": "UseSolanaForDepositOrWithdraw",
+      "msg": "Use Solana for Deposit or Withdraw"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidTokenIdx",
+      "msg": "Invalid Token Index"
+    },
+    {
+      "code": 6004,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient Funds"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidAmount",
+      "msg": "Invalid Amount"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidAuthority",
+      "msg": "Invalid Authority"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidWorldAgent",
+      "msg": "Invalid World Agent"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidCitizenAsset",
+      "msg": "Invalid Citizen Asset"
+    },
+    {
+      "code": 6009,
+      "name": "NationIsDead",
+      "msg": "Nation Is Dead"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidNationIdx",
+      "msg": "Invalid Nation Index"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidBroker",
+      "msg": "Invalid Broker"
+    },
+    {
+      "code": 6012,
+      "name": "BountyNotExpired",
+      "msg": "Bounty Not Expired"
+    },
+    {
+      "code": 6013,
+      "name": "BountyExpired",
+      "msg": "Bounty Expired"
+    },
+    {
+      "code": 6014,
+      "name": "GameNotOver",
+      "msg": "Game Not Over"
+    }
+  ],
+  "types": [
+    {
+      "name": "BaseAssetV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": {
+                "name": "Key"
+              }
+            }
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "update_authority",
+            "type": {
+              "defined": {
+                "name": "UpdateAuthority"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "seq",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BaseCollectionV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": {
+                "name": "Key"
+              }
+            }
+          },
+          {
+            "name": "update_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "num_minted",
+            "type": "u32"
+          },
+          {
+            "name": "current_size",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bounty",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "bounty_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "expiry_slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BrokerEscrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "broker_key",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimBountyArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty_nonce",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "bounty_proof",
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimBountyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "bounty_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "player_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateBountyArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "expiry_slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositOrWithdrawSolArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "is_deposit",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositOrWithdrawTokenArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_idx",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "is_deposit",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositToBrokerArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositToBrokerEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "nation_id",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Game",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "collection",
+            "type": "pubkey"
+          },
+          {
+            "name": "slot_start",
+            "type": "u64"
+          },
+          {
+            "name": "world_agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "broker_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint_cost",
+            "type": "u64"
+          },
+          {
+            "name": "bounty_pow_threshold",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nations_alive",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameOverEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitGameArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "slot_start",
+            "type": "u64"
+          },
+          {
+            "name": "collection_uri",
+            "type": "string"
+          },
+          {
+            "name": "world_agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "broker_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint_cost",
+            "type": "u64"
+          },
+          {
+            "name": "bounty_pow_threshold",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitNationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u8"
+          },
+          {
+            "name": "gdp",
+            "type": "u64"
+          },
+          {
+            "name": "healthcare",
+            "type": "u64"
+          },
+          {
+            "name": "environment",
+            "type": "u64"
+          },
+          {
+            "name": "stability",
+            "type": "u64"
+          },
+          {
+            "name": "gdp_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "healthcare_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "environment_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "stability_reward_rate",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Key",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "AssetV1"
+          },
+          {
+            "name": "HashedAssetV1"
+          },
+          {
+            "name": "PluginHeaderV1"
+          },
+          {
+            "name": "PluginRegistryV1"
+          },
+          {
+            "name": "CollectionV1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintCitizenEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "player_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "nation_state_idx",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintTokensToPlayerWalletArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintTokensToPlayerWalletEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "player_wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Nation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "nation_id",
+            "type": "u8"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "minted_tokens_total",
+            "type": "u64"
+          },
+          {
+            "name": "gdp",
+            "type": "u64"
+          },
+          {
+            "name": "healthcare",
+            "type": "u64"
+          },
+          {
+            "name": "environment",
+            "type": "u64"
+          },
+          {
+            "name": "stability",
+            "type": "u64"
+          },
+          {
+            "name": "gdp_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "healthcare_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "environment_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "stability_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "is_alive",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NationBoostArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lamports_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NationBoostEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "nation_id",
+            "type": "u8"
+          },
+          {
+            "name": "lamports_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NationDissolutionEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "nation_id",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Player",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "x_username",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "balances",
+            "type": {
+              "array": [
+                "u64",
+                193
+              ]
+            }
+          },
+          {
+            "name": "weights",
+            "type": {
+              "array": [
+                "u64",
+                193
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterPlayerArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "x_username",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeOrUnstakeCitizenArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nation_idx",
+            "type": {
+              "option": "u8"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeOrUnstakeCitizenEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "player_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_staked",
+            "type": "bool"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwapTokenToTokenArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "from_token_idx",
+            "type": "u8"
+          },
+          {
+            "name": "to_token_idx",
+            "type": "u8"
+          },
+          {
+            "name": "amount_in",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransferTokensArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_idx",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateAuthority",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Address",
+            "fields": [
+              "pubkey"
+            ]
+          },
+          {
+            "name": "Collection",
+            "fields": [
+              "pubkey"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateNationRewardRateArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gdp_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "healthcare_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "environment_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "stability_reward_rate",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Wallet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "balances",
+            "type": {
+              "array": [
+                "u64",
+                193
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorldDisasterArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gdp_damage",
+            "type": "u64"
+          },
+          {
+            "name": "health_damage",
+            "type": "u64"
+          },
+          {
+            "name": "environment_damage",
+            "type": "u64"
+          },
+          {
+            "name": "stability_damage",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorldDisasterEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "nation_id",
+            "type": "u8"
+          },
+          {
+            "name": "gdp_damage",
+            "type": "u64"
+          },
+          {
+            "name": "health_damage",
+            "type": "u64"
+          },
+          {
+            "name": "environment_damage",
+            "type": "u64"
+          },
+          {
+            "name": "stability_damage",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

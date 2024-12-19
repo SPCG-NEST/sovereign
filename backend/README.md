@@ -1,15 +1,12 @@
 # backend
 
-To install dependencies:
-
+### Install
 ```bash
 bun install
 ```
 
-To run:
+### Run
+1. Start local validator. For example, from the `../programs` directory, run `bun run start`. 
+2. In another terminal, start the ingestion engine from this directory with `bun run start`.
 
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.38. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+A quick test: from the `../programs` directory, run `bun test`. Program logs should print out to your second terminal.
