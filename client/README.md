@@ -52,7 +52,7 @@ for development
         const bountyHashLimited = reduceTo252Bits(numberToUint8Array(bountyHash));
         ```
 
-# Twitter Sign in Todo
+# Twitter Sign in Todo [gpt](https://chatgpt.com/share/67644963-0bdc-8012-9348-9c275b360fba)
 
 User clicks "Sign in with Twitter" → Frontend redirects to /auth/twitter.
 
