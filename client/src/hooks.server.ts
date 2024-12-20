@@ -133,32 +133,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			);
 
-			const userData = userResponse.data;
+			const userData = userResponse.data.data as {
+				id: string; // twitter id
+				name: string; // set name
+				username: string; // twitter handle
+			};
 
 			// Store user data (can be saved to a database or used to create a session)
 			cookies.set('twitter_user', JSON.stringify(userData), {
 				path: '/',
-				httpOnly: true,
+				httpOnly: true, // allow for access on client
 				secure: true
+				// httpOnly: false, // allow for access on client
+				// secure: false
 			});
 
-			console.log('DEBUG XXXXXXXXXXXXXXXXXX', { userData });
+			console.log('DEBUG XXXXXXXXXXXXXXXXXX', { userData, userResponse });
 
 			// Redirect the user back to the homepage (or another route)
-
 			throw redirect(302, '/');
 		} catch (error) {
-			console.log('isinstance', error instanceof Error);
-			if (!(error instanceof Error)) throw error;
+			if (!(error instanceof Error)) throw error; // passthrough redirect
 			console.error('Error during token exchange or user fetch:', error);
 			console.log('DEBUG - ERROR');
-			console.table({
-				// url: url.toString(),
-				state,
-				storedState,
-				code,
-				codeVerifier
-			});
 			return new Response('Authentication failed' + JSON.stringify(error), {
 				status: 500
 			});

@@ -9,6 +9,7 @@
 	import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 	import { onMount } from 'svelte';
 	import type { AppKit } from '@reown/appkit';
+	import ModalTwitter from './Modals/ModalTwitter.svelte';
 
 	let appkit: AppKit | null = $state(null);
 	let address = $derived.by(() => ($walletStore.connected ? $walletStore.address : ''));
@@ -62,6 +63,13 @@
 <div
 	class="grid h-screen w-screen md:grid-cols-[2fr_1fr] md:grid-rows-[5rem_1fr] md:overflow-x-hidden"
 >
+	{#if !!address}
+		<div class="bg-orange-400 p-2 text-black md:hidden">
+			<ModalTwitter>
+				<button>Verify your X Account</button>
+			</ModalTwitter>
+		</div>
+	{/if}
 	<div
 		class="order-last justify-center border-t-8 border-panel border-b-panel px-4 md:order-first md:flex md:justify-between md:border-b-8 md:border-r-8 md:border-t-0"
 	>
