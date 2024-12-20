@@ -4,173 +4,99 @@ import * as env from '$env/static/private';
 import crypto from 'crypto';
 import axios from 'axios';
 
+const TWITTER_OAUTH_URL = 'https://twitter.com/i/oauth2/authorize';
 const CALLBACK_URL = env.X_CALLBACK_URL;
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const requestedPath = event.url.pathname;
 	const cookies = event.cookies;
 
-	console.log({ SECRET: env.X_CLIENT_SECRET, CLIENTID: env.X_CLIENT_ID });
+	// Generate a code verifier and code challenge for PKCE (Proof Key for Code Exchange)
+	const codeVerifier = crypto.randomBytes(32).toString('base64url');
+	const codeChallenge = crypto
+		.createHash('sha256')
+		.update(codeVerifier)
+		.digest('base64');
+
+	// Save the code verifier in cookies for later use
+	cookies.set('twitter_code_verifier', codeVerifier, {
+		path: '/',
+		httpOnly: true,
+		secure: true
+	});
 
 	if (requestedPath === '/auth/twitter') {
-		// Step 1: Generate OAuth parameters
-		const oauthNonce = crypto.randomBytes(32).toString('hex');
-		const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
-
-		// Create parameter object in alphabetical order (important for signature)
-		const parameters = {
-			oauth_callback: CALLBACK_URL,
-			oauth_consumer_key: env.X_CLIENT_ID,
-			oauth_nonce: oauthNonce,
-			oauth_signature_method: 'HMAC-SHA1',
-			oauth_timestamp: oauthTimestamp,
-			oauth_version: '1.0'
-		};
-
-		// Create parameter string for signature
-		const paramString = Object.keys(parameters)
-			.sort()
-			.map(
-				(key) =>
-					`${encodeURIComponent(key)}=${encodeURIComponent(parameters[key as keyof typeof parameters])}`
-			)
-			.join('&');
-
-		// Generate signature base string
-		const signatureBaseString = [
-			'POST',
-			'https://api.twitter.com/oauth/request_token',
-			paramString
-		]
-			.map(encodeURIComponent)
-			.join('&');
-
-		// Create signing key
-		const signingKey = `${encodeURIComponent(env.X_CLIENT_SECRET)}&`;
-
-		// Generate signature
-		const oauthSignature = crypto
-			.createHmac('sha1', signingKey)
-			.update(signatureBaseString)
-			.digest('base64');
-
-		// Create Authorization header
-		const authHeader =
-			'OAuth ' +
-			Object.entries({
-				...parameters,
-				oauth_signature: oauthSignature
-			})
-				.map(
-					([key, value]) =>
-						`${encodeURIComponent(key)}="${encodeURIComponent(value)}"`
-				)
-				.join(', ');
-
-		try {
-			const response = await axios.post(
-				'https://api.twitter.com/oauth/request_token',
-				null,
-				{
-					headers: {
-						Authorization: authHeader,
-						'Content-Type': 'application/x-www-form-urlencoded'
-					}
-				}
-			);
-
-			const responseData = new URLSearchParams(response.data);
-			const oauthToken = responseData.get('oauth_token');
-
-			if (!oauthToken) {
-				throw new Error('Failed to obtain request token from Twitter');
-			}
-
-			// Step 2: Redirect to Twitter's authentication page
-			throw redirect(
-				302,
-				`https://api.twitter.com/oauth/authenticate?oauth_token=${oauthToken}`
-			);
-		} catch (error) {
-			console.error('Error during Twitter login:', error);
-			if (axios.isAxiosError(error)) {
-				console.error('Response data:', error.response?.data);
-				console.error('Response status:', error.response?.status);
-			}
-			return new Response('Failed to start Twitter login', { status: 500 });
-		}
-	}
-
-	// If user is returning from Twitter (callback)
-	if (requestedPath === '/auth/callback') {
-		const oauthToken = event.url.searchParams.get('oauth_token');
-		const oauthVerifier = event.url.searchParams.get('oauth_verifier');
-
-		if (!oauthToken || !oauthVerifier) {
-			return new Response('Missing OAuth token or verifier', { status: 400 });
-		}
-
-		const oauthNonce = crypto.randomBytes(32).toString('hex');
-		const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
-
-		const params = new URLSearchParams({
-			oauth_consumer_key: env.X_CLIENT_ID,
-			oauth_nonce: oauthNonce,
-			oauth_signature_method: 'HMAC-SHA1',
-			oauth_timestamp: oauthTimestamp,
-			oauth_version: '1.0',
-			oauth_token: oauthToken
+		// Redirect the user to the Twitter authorization page
+		const state = crypto.randomBytes(16).toString('hex');
+		cookies.set('twitter_auth_state', state, {
+			path: '/',
+			httpOnly: true,
+			secure: true
 		});
 
-		const signatureBaseString = `POST&${encodeURIComponent('https://api.twitter.com/oauth/access_token')}&${encodeURIComponent(params.toString())}`;
-		const signingKey = `${encodeURIComponent(env.X_CLIENT_SECRET)}&`;
-		const oauthSignature = crypto
-			.createHmac('sha1', signingKey)
-			.update(signatureBaseString)
-			.digest('base64');
+		const oauth2Parameters = new URLSearchParams({
+			response_type: 'code',
+			client_id: env.X_CLIENT_ID,
+			redirect_uri: CALLBACK_URL,
+			scope: 'users.read',
+			state,
+			code_challenge: codeChallenge,
+			code_challenge_method: 'S256'
+		});
 
-		params.append('oauth_signature', oauthSignature);
+		throw redirect(302, `${TWITTER_OAUTH_URL}?${oauth2Parameters.toString()}`);
+	}
+
+	if (requestedPath === '/auth/twitter/callback') {
+		const url = new URL(event.url);
+		const code = url.searchParams.get('code');
+		const state = url.searchParams.get('state');
+		const storedState = cookies.get('twitter_auth_state');
+		const codeVerifier = cookies.get('twitter_code_verifier');
+
+		if (!code || !state || state !== storedState) {
+			return new Response('Invalid state or missing code', { status: 400 });
+		}
 
 		try {
-			const response = await axios.post(
-				'https://api.twitter.com/oauth/access_token',
-				null,
+			const tokenResponse = await axios.post(
+				'https://api.twitter.com/2/oauth2/token',
+				new URLSearchParams({
+					grant_type: 'authorization_code',
+					code,
+					redirect_uri: CALLBACK_URL,
+					client_id: env.X_CLIENT_ID,
+					code_verifier: codeVerifier as string
+				}),
 				{
-					headers: {
-						Authorization: `OAuth ${params.toString()}`,
-						'Content-Type': 'application/x-www-form-urlencoded'
-					}
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
 				}
 			);
 
-			const responseData = new URLSearchParams(response.data);
-			const accessToken = responseData.get('oauth_token');
-			const accessTokenSecret = responseData.get('oauth_token_secret');
-			const userId = responseData.get('user_id');
-			const screenName = responseData.get('screen_name');
+			const { access_token } = tokenResponse.data;
 
-			console.log('Twitter user authenticated:', {
-				accessToken,
-				userId,
-				screenName
-			});
+			// Use the access token to get the user info from Twitter
+			const userResponse = await axios.get(
+				'https://api.twitter.com/2/users/me',
+				{
+					headers: { Authorization: `Bearer ${access_token}` }
+				}
+			);
 
-			// Save the user session data (e.g., store in cookies, local storage, or database)
-			event.cookies.set('twitter_access_token', accessToken!, {
+			const userData = userResponse.data;
+
+			// Store user data (can be saved to a database or used to create a session)
+			cookies.set('twitter_user', JSON.stringify(userData), {
 				path: '/',
-				httpOnly: true
-			});
-			event.cookies.set('twitter_screen_name', screenName!, {
-				path: '/',
-				httpOnly: true
+				httpOnly: true,
+				secure: true
 			});
 
+			// Redirect the user back to the homepage (or another route)
 			throw redirect(302, '/');
 		} catch (error) {
-			console.error('Error exchanging request token for access token:', error);
-			return new Response('Failed to authenticate with Twitter', {
-				status: 500
-			});
+			console.error('Error during token exchange or user fetch:', error);
+			return new Response('Authentication failed', { status: 500 });
 		}
 	}
 
