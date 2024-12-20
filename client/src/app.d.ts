@@ -6,7 +6,13 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env: {
+				X_CLIENT_ID: string;
+				X_CLIENT_SECRET: string;
+				X_CALLBACK_URL: string;
+			};
+		}
 	}
 }
 

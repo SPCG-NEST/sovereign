@@ -43,6 +43,7 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
+    "@auth/sveltekit": "^1.7.4",
     "@reown/appkit": "^1.6.0",
     "@reown/appkit-adapter-solana": "^1.6.0",
     "@solana/wallet-adapter-base": "^0.9.23",
@@ -52,6 +53,7 @@
     "@svelte-on-solana/wallet-adapter-ui": "^1.0.21-alpha.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
+    "axios": "^1.7.9",
     "tailwindcss-animate": "^1.0.7"
   }
 }
