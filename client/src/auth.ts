@@ -6,7 +6,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		XProvider({
 			clientId: process.env.X_CLIENT_ID,
 			clientSecret: process.env.X_CLIENT_SECRET,
-			callbackUrl: process.env.X_CALLBACK_URL
+			redirectProxyUrl: process.env.X_CALLBACK_URL
 		})
 	]
 	// secret: process.env.AUTH_SECRET
