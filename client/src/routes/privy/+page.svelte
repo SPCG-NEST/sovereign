@@ -2,9 +2,12 @@
 	import { page } from '$app/stores';
 	import Privy, { getAllUserEmbeddedSolanaWallets, getUserEmbeddedEthereumWallet, getUserEmbeddedSolanaWallet, LocalStorage, type PrivyEmbeddedSolanaWalletProvider } from '@privy-io/js-sdk-core';
 	import type { PrivyAuthenticatedUser } from '@privy-io/public-api';
-	import { ComputeBudgetProgram, Connection, PublicKey, SystemProgram, Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+	import { ComputeBudgetProgram, Connection, PublicKey, SendTransactionError, SystemProgram, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 	import { onDestroy, onMount } from 'svelte';
-	
+	import nacl from 'tweetnacl';
+	import bs58 from 'bs58';
+	import type {Signer, TransactionError} from '@solana/web3.js';
+
 	let privy_oauth_state = $page.url.searchParams.get('privy_oauth_state');
 	let privy_oauth_code = $page.url.searchParams.get('privy_oauth_code');
 	
@@ -57,34 +60,77 @@
 			const accounts = getAllUserEmbeddedSolanaWallets(user!.user);
 			address = accounts[0].address;
 			const provider = await privy.embeddedWallet.getSolanaProvider(accounts[0], accounts[0].address, "solana-address-verifier");
-			const connection = new Connection("https://api.devnet.solana.com");
+			const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=3ceae916-762d-41f0-bdae-1145f7b415ae", "confirmed");
 			const pkey = new PublicKey(address);
+			console.log("pkey: ", pkey.toBase58());
 			
-			const tx = new VersionedTransaction(new TransactionMessage({
+			const simpleTx = new VersionedTransaction(new TransactionMessage({
 				payerKey: pkey,
 				recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
 				instructions: [
-					ComputeBudgetProgram.setComputeUnitPrice({microLamports: 1_000_000}),
-					ComputeBudgetProgram.setComputeUnitLimit({units: 100000}),
 					SystemProgram.transfer({
 						fromPubkey: pkey,
 						toPubkey: pkey,
 						lamports: 1
 					})
 				]
-			}).compileToV0Message());    
-			const serialized = Buffer.from(tx.serialize()).toString('base64');
-			console.log("Pre signed: ", serialized);
+			}).compileToLegacyMessage());
+			const message = Buffer.from(simpleTx.message.serialize()).toString('base64');
+			const simpleSig = (await provider.request({
+				method: "signMessage",
+				params: {
+					message: message
+				}
+			})).signature;
+			console.log("signature: ", simpleSig);
+			simpleTx.addSignature(pkey, Uint8Array.from(Buffer.from(simpleSig, "base64")));
+			console.log("Signed: ", Buffer.from(simpleTx.serialize()).toString('base64'));
+            // sign that message ^^^ and attach the signature
+
+
+			return;
+			const tx = new VersionedTransaction(new TransactionMessage({
+				payerKey: pkey,
+				recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+				instructions: [
+					SystemProgram.transfer({
+						fromPubkey: pkey,
+						toPubkey: pkey,
+						lamports: 1
+					})
+				]
+			}).compileToLegacyMessage());    
+			const serialized = tx.serialize();
+			console.log("Pre signed: ", Buffer.from(serialized).toString('base64'));
 			const signature = (await provider.request({
 				method: "signMessage",
 				params: {
-					message: serialized
+					message: Buffer.from(serialized).toString('base64')
 				}
 			})).signature;
+			console.log("signature: ", signature);
+			
+			const result = nacl.sign.detached.verify(
+				serialized,
+				Uint8Array.from(Buffer.from(signature, "base64")),
+				bs58.decode(pkey.toBase58())
+			)
+			console.log("result: ", result);
+
+			console.log("signature bytes", Uint8Array.from(Buffer.from(signature, "base64")).length);
+
 			tx.addSignature(pkey, Uint8Array.from(Buffer.from(signature, "base64")));
-			console.log("Signed: ", Buffer.from(tx.serialize()).toString('base64'));
-			const txnSig = await connection.sendRawTransaction(tx.serialize());
-			console.log("txnSig: ", txnSig);
+			const txserialized = tx.serialize();
+			console.log("Signed: ", Buffer.from(txserialized).toString('base64'));
+			console.log("signatures array: ", tx.signatures.map(sig => bs58.encode(sig)));
+			try {
+				const txnSig = await connection.sendTransaction(tx);
+				console.log("txnSig: ", txnSig);
+			} catch(e: any) {
+				console.log(e);
+				console.log("logs: ", e.logs);
+				console.log(await e.getLogs(connection));
+			}
 
 
 			/*	
@@ -116,6 +162,10 @@
 			embeddedWallet = (await privy?.embeddedWallet.createSolana())!.provider;
 		}
 		
+	}
+
+	async function testMessage() {
+
 	}
 </script>
 

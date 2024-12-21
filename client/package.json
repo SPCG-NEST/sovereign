@@ -54,7 +54,9 @@
     "@svelte-on-solana/wallet-adapter-ui": "^1.0.21-alpha.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
+    "bs58": "^6.0.0",
     "tailwindcss-animate": "^1.0.7",
+    "tweetnacl": "^1.0.3",
     "vite-plugin-node-polyfills": "^0.22.0"
   }
 }
