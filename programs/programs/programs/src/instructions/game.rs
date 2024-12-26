@@ -8,6 +8,7 @@ use crate::{
     constant::{
         BALANCES_INIT, BROKER_ESCROW_SEED, GAME_SEED, POOL_SEED, TXN_FEE, WALLET_SEED, WEIGHTS_INIT,
     },
+    error::SovereignError,
     state::{BrokerEscrow, Game, Pool, Wallet},
 };
 
@@ -29,7 +30,9 @@ pub fn init_game(ctx: Context<InitGame>, game_id: u64, init_game_args: InitGameA
 
     transfer(
         CpiContext::new(system_program, transfer_accounts),
-        TXN_FEE * 25_000,
+        TXN_FEE
+            .checked_mul(25_000)
+            .ok_or(SovereignError::MathOverflow)?,
     )?;
 
     // Log game event

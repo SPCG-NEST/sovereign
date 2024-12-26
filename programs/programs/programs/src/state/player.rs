@@ -14,7 +14,7 @@ pub struct Player {
 #[account]
 #[derive(InitSpace)]
 pub struct StakedCitizen {
-    pub citizen_asset: Pubkey,
+    pub citizen_asset_id: Pubkey,
     pub owner: Pubkey,
     pub nation_id: u8,
     pub game_id: u64,

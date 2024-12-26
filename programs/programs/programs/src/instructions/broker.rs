@@ -1,6 +1,10 @@
 use anchor_lang::prelude::*;
 
-use crate::{constant::BOUNTY_SEED, error::SovereignError, state::{Bounty, Game}};
+use crate::{
+    constant::{BOUNTY_SEED, GAME_SEED},
+    error::SovereignError,
+    state::{Bounty, Game},
+};
 
 pub fn create_bounty(ctx: Context<CreateBounty>, args: CreateBountyArgs) -> Result<()> {
     let bounty = &mut ctx.accounts.bounty;
@@ -8,8 +12,16 @@ pub fn create_bounty(ctx: Context<CreateBounty>, args: CreateBountyArgs) -> Resu
     bounty.bounty_hash = args.bounty_hash;
     bounty.amount = args.amount;
     bounty.expiry_slot = args.expiry_slot;
+
+    emit!(CreateBountyEvent {
+        game_id: ctx.accounts.game.id,
+        bounty_hash: args.bounty_hash,
+        amount: args.amount,
+        expiry_slot: args.expiry_slot,
+    });
+
     Ok(())
-}  
+}
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateBountyArgs {
@@ -24,6 +36,8 @@ pub struct CreateBounty<'info> {
     #[account(mut)]
     pub broker_key: Signer<'info>,
     #[account(
+        seeds = [GAME_SEED.as_bytes(), game.id.to_le_bytes().as_ref()],
+        bump,
         constraint = game.broker_key == broker_key.key() @ SovereignError::InvalidBroker
     )]
     pub game: Account<'info, Game>,
@@ -38,8 +52,19 @@ pub struct CreateBounty<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[event]
+pub struct CreateBountyEvent {
+    pub game_id: u64,
+    pub bounty_hash: [u8; 32],
+    pub amount: u64,
+    pub expiry_slot: u64,
+}
+
 pub fn cleanup_bounty(ctx: Context<CleanupBounty>) -> Result<()> {
-    require!(ctx.accounts.bounty.expiry_slot >= Clock::get()?.slot, SovereignError::BountyNotExpired);    
+    require!(
+        ctx.accounts.bounty.expiry_slot >= Clock::get()?.slot,
+        SovereignError::BountyNotExpired
+    );
     Ok(())
 }
 

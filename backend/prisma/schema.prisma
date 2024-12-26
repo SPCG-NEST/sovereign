@@ -73,3 +73,15 @@ model PlayerAccount {
   authority String
   xUsername String
 }
+
+model StakedCitizenAccount {
+  pubkey         String
+  citizenAssetId String
+  owner          String
+  nationId       Int
+  gameId         BigInt
+  rewardAmount   String
+  completeSlot   String
+
+  @@id([pubkey, completeSlot])
+}

@@ -1,19 +1,19 @@
-use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
-use crate::{constant::{TXN_FEE, WALLET_SEED}, error::SovereignError, state::{Game, Nation, Wallet}};
-
+use crate::{
+    constant::{TXN_FEE, WALLET_SEED},
+    error::SovereignError,
+    state::{Game, Nation, Wallet},
+};
 
 pub fn world_disaster(ctx: Context<WorldDisaster>, args: WorldDisasterArgs) -> Result<()> {
-    require!(ctx.accounts.game_account.nations_alive > 1, SovereignError::GameNotOver);
-
-    emit!(WorldDisasterEvent {
-        game_id: ctx.accounts.game_account.id,
-        nation_id: ctx.accounts.nation.nation_id,
-        gdp_damage: args.gdp_damage,
-        health_damage: args.health_damage,
-        environment_damage: args.environment_damage,
-        stability_damage: args.stability_damage,
-    });
+    require!(
+        ctx.accounts.game_account.nations_alive > 1,
+        SovereignError::GameNotOver
+    );
 
     let nation = &mut ctx.accounts.nation;
     // If nation is dead, transfer all it's SOL to the world agent
@@ -33,7 +33,11 @@ pub fn world_disaster(ctx: Context<WorldDisaster>, args: WorldDisasterArgs) -> R
         nation.healthcare -= args.health_damage;
     }
 
-    if nation.environment.checked_sub(args.environment_damage).is_none() {
+    if nation
+        .environment
+        .checked_sub(args.environment_damage)
+        .is_none()
+    {
         // Nation is dead
         nation.is_alive = false;
         nation.environment = 0;
@@ -41,7 +45,11 @@ pub fn world_disaster(ctx: Context<WorldDisaster>, args: WorldDisasterArgs) -> R
         nation.environment -= args.environment_damage;
     }
 
-    if nation.stability.checked_sub(args.stability_damage).is_none() {
+    if nation
+        .stability
+        .checked_sub(args.stability_damage)
+        .is_none()
+    {
         // Nation is dead
         nation.is_alive = false;
         nation.stability = 0;
@@ -56,19 +64,37 @@ pub fn world_disaster(ctx: Context<WorldDisaster>, args: WorldDisasterArgs) -> R
             nation_id: nation.nation_id,
         });
 
-        let nation_signer_seeds = &[WALLET_SEED.as_bytes(), &ctx.accounts.game_account.id.to_le_bytes(), &nation.authority.to_bytes(), &[ctx.bumps.nation]];
+        let nation_signer_seeds = &[
+            WALLET_SEED.as_bytes(),
+            &ctx.accounts.game_account.id.to_le_bytes(),
+            &nation.authority.to_bytes(),
+            &[ctx.bumps.nation],
+        ];
         transfer(
             CpiContext::new_with_signer(
-                ctx.accounts.system_program.to_account_info(), 
+                ctx.accounts.system_program.to_account_info(),
                 Transfer {
                     from: nation.to_account_info(),
                     to: ctx.accounts.world_agent_wallet.to_account_info(),
                 },
-                &[nation_signer_seeds]
+                &[nation_signer_seeds],
             ),
-            nation.to_account_info().lamports() - TXN_FEE // leave some for transfer fee
+            nation
+                .to_account_info()
+                .lamports()
+                .checked_sub(TXN_FEE)
+                .ok_or(SovereignError::MathOverflow)?, // leave some for transfer fee
         )?;
-    } 
+    }
+
+    emit!(WorldDisasterEvent {
+        game_id: ctx.accounts.game_account.id,
+        nation_id: nation.nation_id,
+        nation_gdp: nation.gdp,
+        nation_healthcare: nation.healthcare,
+        nation_environment: nation.environment,
+        nation_stability: nation.stability,
+    });
 
     Ok(())
 }
@@ -77,10 +103,10 @@ pub fn world_disaster(ctx: Context<WorldDisaster>, args: WorldDisasterArgs) -> R
 pub struct WorldDisasterEvent {
     pub game_id: u64,
     pub nation_id: u8,
-    pub gdp_damage: u64,
-    pub health_damage: u64,
-    pub environment_damage: u64,
-    pub stability_damage: u64,
+    pub nation_gdp: u64,
+    pub nation_healthcare: u64,
+    pub nation_environment: u64,
+    pub nation_stability: u64,
 }
 
 #[event]
@@ -123,17 +149,22 @@ pub struct WorldDisaster<'info> {
 }
 
 pub fn nation_boost(ctx: Context<NationBoost>, args: NationBoostArgs) -> Result<()> {
-    let world_agent_wallet_signer_seeds = &[WALLET_SEED.as_bytes(), &ctx.accounts.game_account.id.to_le_bytes(), &ctx.accounts.game_account.world_agent.to_bytes(), &[ctx.bumps.world_agent_wallet]];
+    let world_agent_wallet_signer_seeds = &[
+        WALLET_SEED.as_bytes(),
+        &ctx.accounts.game_account.id.to_le_bytes(),
+        &ctx.accounts.game_account.world_agent.to_bytes(),
+        &[ctx.bumps.world_agent_wallet],
+    ];
     transfer(
         CpiContext::new_with_signer(
             ctx.accounts.system_program.to_account_info(),
             Transfer {
                 from: ctx.accounts.world_agent_wallet.to_account_info(),
-                to: ctx.accounts.nation_authority.to_account_info(),
+                to: ctx.accounts.nation.to_account_info(),
             },
-            &[world_agent_wallet_signer_seeds]
+            &[world_agent_wallet_signer_seeds],
         ),
-        args.lamports_amount
+        args.lamports_amount,
     )?;
 
     emit!(NationBoostEvent {

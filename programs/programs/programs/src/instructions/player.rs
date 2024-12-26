@@ -34,6 +34,13 @@ pub fn register_player(ctx: Context<RegisterPlayer>, args: RegisterPlayerArgs) -
     ctx.accounts.player_wallet.game_id = ctx.accounts.game.id;
     ctx.accounts.player_wallet.authority = ctx.accounts.player_authority.key();
     ctx.accounts.player_wallet.balances = BALANCES_INIT;
+
+    emit!(RegisterPlayerEvent {
+        game_id: ctx.accounts.game.id,
+        authority: ctx.accounts.player_authority.key().to_string(),
+        x_username: ctx.accounts.player.x_username.clone(),
+    });
+
     Ok(())
 }
 
@@ -66,10 +73,17 @@ pub struct RegisterPlayer<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[event]
+pub struct RegisterPlayerEvent {
+    pub game_id: u64,
+    pub authority: String,
+    pub x_username: String,
+}
+
 pub fn mint_citizen(ctx: Context<MintCitizen>) -> Result<()> {
     // Mint Price is sent 100% to World Agent
     // World Agent will then send to Nation State Account (not authority) based on Citizen's Nation State
-    // Cannot do it in this ix, because nation state is random.
+    // Cannot do it in this ix, because nation state is random, and we'd need its account.
     // We log it so it can be picked up by indexer and added to queue for World Agent to process
 
     transfer(
@@ -83,7 +97,7 @@ pub fn mint_citizen(ctx: Context<MintCitizen>) -> Result<()> {
         ctx.accounts.game.mint_cost,
     )?;
     // Mint Price is sent 100% to World Agent as SOL
-    ctx.accounts.world_agent_wallet.balances[0] += ctx.accounts.game.mint_cost;
+    ctx.accounts.world_agent_wallet.balances[0] = ctx.accounts.world_agent_wallet.balances[0].checked_add(ctx.accounts.game.mint_cost).ok_or(SovereignError::MathOverflow)?;
 
     let signers_seeds = &[
         GAME_SEED.as_bytes(),
@@ -101,9 +115,10 @@ pub fn mint_citizen(ctx: Context<MintCitizen>) -> Result<()> {
     let healthcare_fix = hash_bytes[1] as u8;
     let environment_fix = hash_bytes[2] as u8;
     let stability_fix = hash_bytes[3] as u8;
-    let nation_state_idx = u32::from_be_bytes(clock.slot.to_be_bytes()[4..8].try_into().unwrap())
-        as usize
-        % NATION_STATES.len();
+    let nation_state_idx = {
+        let tmp = u32::from_be_bytes(clock.slot.to_be_bytes()[4..8].try_into().unwrap()) as usize % NATION_STATES.len();
+        if tmp == 0 { 1 } else { tmp }
+    };
     let nation_state = NATION_STATES[nation_state_idx];
 
     CreateV2CpiBuilder::new(&ctx.accounts.mpl_core_program.to_account_info())
@@ -160,8 +175,9 @@ pub fn mint_citizen(ctx: Context<MintCitizen>) -> Result<()> {
     emit!(MintCitizenEvent {
         game_id: ctx.accounts.game.id,
         player_authority: ctx.accounts.player_authority.key().to_string(),
-        asset_id: ctx.accounts.citizen_asset.key().to_string(),
-        nation_state_idx: nation_state_idx as u8,
+        citizen_asset_id: ctx.accounts.citizen_asset.key().to_string(),
+        nation_id: nation_state_idx as u8,
+        mint_cost: ctx.accounts.game.mint_cost,
     });
 
     Ok(())
@@ -171,8 +187,9 @@ pub fn mint_citizen(ctx: Context<MintCitizen>) -> Result<()> {
 pub struct MintCitizenEvent {
     pub game_id: u64,
     pub player_authority: String,
-    pub asset_id: String,
-    pub nation_state_idx: u8,
+    pub citizen_asset_id: String,
+    pub nation_id: u8,
+    pub mint_cost: u64,
 }
 
 #[derive(Accounts)]
@@ -228,7 +245,7 @@ pub fn stake_citizen(ctx: Context<StakeCitizen>, _args: StakeCitizenArgs) -> Res
     // Create StakedCitizen account
     let staked_citizen = &mut ctx.accounts.staked_citizen;
     staked_citizen.owner = ctx.accounts.player_authority.key();
-    staked_citizen.citizen_asset = ctx.accounts.citizen_asset.key();
+    staked_citizen.citizen_asset_id = ctx.accounts.citizen_asset.key();
     staked_citizen.game_id = ctx.accounts.game.id;
     staked_citizen.nation_id = ctx.accounts.nation.nation_id;
     let (_, attribute_plugin, _) = fetch_plugin::<BaseAssetV1, Attributes>(
@@ -281,17 +298,22 @@ pub fn stake_citizen(ctx: Context<StakeCitizen>, _args: StakeCitizenArgs) -> Res
         return Err(SovereignError::CitizenAttributeNotFound.into());
     }
 
-    staked_citizen.reward_amount = rewards.0 + rewards.1 + rewards.2 + rewards.3; 
+    staked_citizen.reward_amount = rewards.0
+    .checked_add(rewards.1)
+    .and_then(|sum| sum.checked_add(rewards.2))
+    .and_then(|sum| sum.checked_add(rewards.3))
+    .ok_or(SovereignError::MathOverflow)?;
 
     let clock = Clock::get()?;
-    staked_citizen.complete_slot = clock.slot + ctx.accounts.game.citizen_stake_length;
+    let complete_slot = clock.slot + ctx.accounts.game.citizen_stake_length;
+    staked_citizen.complete_slot = complete_slot;
 
     emit!(StakeCitizenEvent {
         game_id: ctx.accounts.game.id,
         player_authority: ctx.accounts.player_authority.key().to_string(),
         citizen_asset_id: ctx.accounts.citizen_asset.key().to_string(),
         nation_id: ctx.accounts.nation.nation_id,
-        slot: clock.slot,
+        complete_slot: complete_slot,
     });
 
     Ok(())
@@ -350,7 +372,7 @@ pub struct StakeCitizenEvent {
     pub player_authority: String,
     pub citizen_asset_id: String,
     pub nation_id: u8,
-    pub slot: u64,
+    pub complete_slot: u64,
 }
 pub fn complete_stake(ctx: Context<CompleteStake>, _args: CompleteStakeArgs) -> Result<()> {
     // Check that citizen_asset is frozen
@@ -371,8 +393,8 @@ pub fn complete_stake(ctx: Context<CompleteStake>, _args: CompleteStakeArgs) -> 
         );
 
         // Player recieves rewards
-        ctx.accounts.player_wallet.balances[ctx.accounts.nation.nation_id as usize] = ctx.accounts.player_wallet.balances[ctx.accounts.nation.nation_id as usize].checked_add(staked_citizen.reward_amount).unwrap();
-        ctx.accounts.nation.minted_tokens_total += staked_citizen.reward_amount;   
+        ctx.accounts.player_wallet.balances[ctx.accounts.nation.nation_id as usize] = ctx.accounts.player_wallet.balances[ctx.accounts.nation.nation_id as usize].checked_add(staked_citizen.reward_amount).ok_or(SovereignError::MathOverflow)?;
+        ctx.accounts.nation.minted_tokens_total = ctx.accounts.nation.minted_tokens_total.checked_add(staked_citizen.reward_amount).ok_or(SovereignError::MathOverflow)?;   
 
         // Nation recieves stat buffs
         // Collect all the fix values
@@ -417,10 +439,21 @@ pub fn complete_stake(ctx: Context<CompleteStake>, _args: CompleteStakeArgs) -> 
             return Err(SovereignError::CitizenAttributeNotFound.into());
         }
 
-        ctx.accounts.nation.gdp += fix_values.0;
-        ctx.accounts.nation.healthcare += fix_values.1;
-        ctx.accounts.nation.environment += fix_values.2;
-        ctx.accounts.nation.stability += fix_values.3;
+        ctx.accounts.nation.gdp = ctx.accounts.nation.gdp
+            .checked_add(fix_values.0)
+            .ok_or(SovereignError::MathOverflow)?;
+    
+        ctx.accounts.nation.healthcare = ctx.accounts.nation.healthcare
+            .checked_add(fix_values.1)
+            .ok_or(SovereignError::MathOverflow)?;
+        
+        ctx.accounts.nation.environment = ctx.accounts.nation.environment
+            .checked_add(fix_values.2)
+            .ok_or(SovereignError::MathOverflow)?;
+        
+        ctx.accounts.nation.stability = ctx.accounts.nation.stability
+            .checked_add(fix_values.3)
+            .ok_or(SovereignError::MathOverflow)?;
     }
 
     // Unfreeze citizen_asset
@@ -445,10 +478,10 @@ pub fn complete_stake(ctx: Context<CompleteStake>, _args: CompleteStakeArgs) -> 
         nation_id: ctx.accounts.nation.nation_id,
         reward_amount: staked_citizen.reward_amount,
         slot: slot,
-        nation_fixed_gdp: ctx.accounts.nation.gdp,
-        nation_fixed_healthcare: ctx.accounts.nation.healthcare,
-        nation_fixed_environment: ctx.accounts.nation.environment,
-        nation_fixed_stability: ctx.accounts.nation.stability,
+        nation_gdp: ctx.accounts.nation.gdp,
+        nation_healthcare: ctx.accounts.nation.healthcare,
+        nation_environment: ctx.accounts.nation.environment,
+        nation_stability: ctx.accounts.nation.stability,
     });
 
     Ok(())
@@ -491,7 +524,7 @@ pub struct CompleteStake<'info> {
             citizen_asset.key().as_ref()
         ],
         bump,
-        constraint = staked_citizen.citizen_asset == citizen_asset.key() @ SovereignError::InvalidCitizenAsset,
+        constraint = staked_citizen.citizen_asset_id == citizen_asset.key() @ SovereignError::InvalidCitizenAsset,
         close = player_authority
     )]
     pub staked_citizen: Account<'info, StakedCitizen>,
@@ -512,10 +545,10 @@ pub struct CompleteStakeEvent {
     pub nation_id: u8,
     pub reward_amount: u64,
     pub slot: u64,
-    pub nation_fixed_gdp: u64,
-    pub nation_fixed_healthcare: u64,
-    pub nation_fixed_environment: u64,
-    pub nation_fixed_stability: u64,
+    pub nation_gdp: u64,
+    pub nation_healthcare: u64,
+    pub nation_environment: u64,
+    pub nation_stability: u64,
 }
 
 pub fn claim_bounty(ctx: Context<ClaimBounty>, args: ClaimBountyArgs) -> Result<()> {
@@ -641,7 +674,7 @@ pub struct ClaimBounty<'info> {
             citizen_asset.key().as_ref()
         ],
         bump,
-        constraint = staked_citizen.citizen_asset == citizen_asset.key() @ SovereignError::InvalidCitizenAsset,
+        constraint = staked_citizen.citizen_asset_id == citizen_asset.key() @ SovereignError::InvalidCitizenAsset,
         close = player_authority
     )]
     pub staked_citizen: Account<'info, StakedCitizen>,
